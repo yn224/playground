@@ -36,7 +36,7 @@ cmake -GNinja -DCMAKE_BUILD_TYPE=Release \
 ninja tools/torch-mlir/all check-torch-mlir-all
 ```
 
-### Matmul example
+### Matmul
 1. Running `python3 torch_matmul.py` yields `raw_matmul.mlir`, which gets compiled down to `torch_backend_matmul.mlir` and `linalg_tensor_backend_matmul.mlir`.
 2. Apply [the pass chain](https://github.com/llvm/torch-mlir/blob/main/python/torch_mlir_e2e_test/linalg_on_tensors_backends/refbackend.py#L115-L153) on the file `linalg_tensor_backend_matmul.mlir`. Below are the IRs after each pass before converting to LLVM.
     <details>
@@ -205,7 +205,12 @@ ninja tools/torch-mlir/all check-torch-mlir-all
       * `refback-expand-ops-for-llvm` (no change)
     </details>
 
-### Working example - at least functional
+### Resnet18 - WIP
+* Additional passes required to lower to GPU
+  1. `convert-math-to-llvm`
+  2. `arith-expand`
+
+### Working code
 `runnable_linalg.mlir` - result of lowering `linalg_tensor_backend_matmul.mlir` using passes shown above _without_ `refback-munge-calling-conventions`.
 
 Interestingly, lowering `linalg_tensor_backend_matmul.mlir` up to bufferization still makes it runnable.
@@ -214,9 +219,16 @@ Interestingly, lowering `linalg_tensor_backend_matmul.mlir` up to bufferization 
     1. Run `./run.sh runnable_linalg.mlir 0`
     2. Edit out `"exout.llvm"` contained in the line `.file 1 "$PWD" "exout.llvm"` of `exout.s` that gets generated.
     3. Run `./run.sh runnable_linalg.mlir 1`
+* Expected result:
+  ```
+  Unranked Memref base@ = 0x564c2792cb00 rank = 2 offset = 0 sizes = [2, 2] strides = [2, 1] data =
+  [[5,   5],
+  [9,   9]]
+  ```
 
-Note that working example:
-1. Contains manual annotation of main function `func.func @main{ return }`
-2. Doesn't use the pass `refback-munge-calling-conventions`
-3. Cannot be verified whether the result is correct or not since we are unable to print memref content in LLVM15 (or at least with how we used to print in LLVM14)
-(Solutions derived from errors recorded in `error-tracking.md` file)
+For examples to work, they:
+1. Require manual annotation of main function `func.func @main{ ... }`
+2. Don't go through the pass `refback-munge-calling-conventions`
+
+### Debugging
+All errors are being logged in `error-tracking.md`.

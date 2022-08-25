@@ -17,6 +17,30 @@ module attributes {torch.debug_module_name = "Matmul"} {
     return %2 : memref<2x2xf32>
   }
   func.func @main() {
+    %A = memref.alloc() : memref<2x2xf32>
+
+    %cst2 = arith.constant 2.0 : f32
+    %cst3 = arith.constant 3.0 : f32
+    %cst4 = arith.constant 4.0 : f32
+    %cst5 = arith.constant 5.0 : f32
+
+    %c0 = arith.constant 0 : index
+    %c1 = arith.constant 1 : index
+
+    memref.store %cst2, %A[%c0, %c0] : memref<2x2xf32>
+    memref.store %cst3, %A[%c0, %c1] : memref<2x2xf32>
+    memref.store %cst4, %A[%c1, %c0] : memref<2x2xf32>
+    memref.store %cst5, %A[%c1, %c1] : memref<2x2xf32>
+
+    %cast_A = memref.cast %A : memref<2x2xf32> to memref<*xf32>
+    gpu.host_register %cast_A : memref<*xf32>
+
+    %B = call @forward(%A) : (memref<2x2xf32>) -> (memref<2x2xf32>)
+    %cast_B = memref.cast %B : memref<2x2xf32> to memref<*xf32>
+
+    call @printMemrefF32(%cast_B) : (memref<*xf32>) -> ()
+
     return
   }
+  func.func private @printMemrefF32(%ptr : memref<*xf32>)
 }

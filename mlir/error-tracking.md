@@ -1,5 +1,6 @@
 # Error Tracking for GPU execution
 
+## General
 Omit func-bufferize --> finalizing-bufferize won't work
 
 * LLVM15 - seems like it doesn't support printing by us?
@@ -9,6 +10,7 @@ Omit func-bufferize --> finalizing-bufferize won't work
 clang-15: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
 
+## Matmul example
 * `linalg-bufferize`
   * Further lowering required
 * `func-bufferize`
@@ -66,3 +68,11 @@ clang-15: error: linker command failed with exit code 1 (use -v to see invocatio
     /home/yn224/linalg:11: undefined reference to `_mlir_ciface_refbackend_consume_func_return_mrf32'
     clang-15: error: linker command failed with exit code 1 (use -v to see invocation)
     ```
+
+## Resnet18 example
+Error:
+```
+/opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9/../../../../bin/ld: exout.o: relocation R_X86_64_32 against `.rodata' can not be used when making a PIE object; recompile with -fPIC
+/opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9/../../../../bin/ld: final link failed: nonrepresentable section on output
+clang-15: error: linker command failed with exit code 1 (use -v to see invocation)
+```
