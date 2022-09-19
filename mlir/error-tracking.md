@@ -1,4 +1,7 @@
 # Error Tracking for GPU execution
+<mark>NOTE</mark> For examples to work, they:
+1. Require manual annotation of main function `func.func @main{ ... }`
+2. Don't go through the pass `refback-munge-calling-conventions`
 
 ## General
 Omit func-bufferize --> finalizing-bufferize won't work
@@ -53,7 +56,7 @@ clang-15: error: linker command failed with exit code 1 (use -v to see invocatio
     /opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9/../../../../bin/ld: /home/yn224/linalg:10: undefined reference to `_mlir_ciface_refbackend_consume_func_return_mrf32'
     clang-15: error: linker command failed with exit code 1 (use -v to see invocation)
     ```
-  
+
   * Solution (for `_start`): Manually annotate func.func @main{ return }
   * Solution (for `_mlir_ciface_refbackend_consume_func_return_mrf32`): Don't use this pass
 
@@ -70,9 +73,10 @@ clang-15: error: linker command failed with exit code 1 (use -v to see invocatio
     ```
 
 ## Resnet18 example
-Error:
-```
-/opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9/../../../../bin/ld: exout.o: relocation R_X86_64_32 against `.rodata' can not be used when making a PIE object; recompile with -fPIC
-/opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9/../../../../bin/ld: final link failed: nonrepresentable section on output
-clang-15: error: linker command failed with exit code 1 (use -v to see invocation)
-```
+* Error:
+  * ```
+    /opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9/../../../../bin/ld: exout.o: relocation R_X86_64_32 against `.rodata' can not be used when making a PIE object; recompile with -fPIC
+    /opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9/../../../../bin/ld: final link failed: nonrepresentable section on output
+    clang-15: error: linker command failed with exit code 1 (use -v to see invocation)
+    ```
+* Solution: `-no-pie` option added in `clang++` command in `run.sh`.
