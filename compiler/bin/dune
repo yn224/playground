@@ -1,0 +1,3 @@
+(executable
+ (name ync)
+ (modes byte exe))
