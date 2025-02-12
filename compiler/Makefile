@@ -1,10 +1,14 @@
 
-.PHONY: ync clean
+.PHONY: run clean setup
 
 all:
 	dune build
 
-ync:
+# OCaml environment setup
+setup:
+	eval $(opam env)
+
+run:
 	@_build/default/bin/ync.exe
 
 clean:
